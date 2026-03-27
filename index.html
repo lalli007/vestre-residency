@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lárus Sigurvin — Lyttereise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --bg2: #0f0f0f;
+    --fg: #d4cfc7;
+    --fg-dim: #6a6560;
+    --fg-dimmer: #2e2b28;
+    --accent: #c8a96e;
+    --accent-dim: #6b5a38;
+    --line: #1e1c1a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    cursor: crosshair;
+  }
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(8px);
+  }
+  .nav-name {
+    font-family: 'IM Fell English', serif;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--fg-dim);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 120px 40px 60px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(200,169,110,0.04) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 70%, rgba(100,80,50,0.06) 0%, transparent 70%);
+  }
+  /* Oscilloscope-inspired decorative lines */
+  .hero-wave {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--fg-dimmer) 20%, var(--fg-dimmer) 80%, transparent);
+    opacity: 0.4;
+  }
+  .hero-counter {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--fg-dim);
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .hero-counter::before {
+    content: '—';
+    margin-right: 12px;
+    color: var(--accent);
+  }
+  .hero-title {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(48px, 8vw, 96px);
+    line-height: 1.0;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .hero-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: clamp(18px, 2.5vw, 28px);
+    color: var(--fg-dim);
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 40px;
+    position: relative;
+  }
+  .hero-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hero-meta-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+  }
+  .hero-meta-value {
+    font-size: 13px;
+    color: var(--fg);
+  }
+  /* SECTIONS */
+  section {
+    padding: 80px 40px;
+    border-bottom: 1px solid var(--line);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+    max-width: 200px;
+  }
+  /* CONCEPT */
+  .concept-text {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(18px, 2vw, 22px);
+    line-height: 1.65;
+    color: var(--fg);
+    max-width: 680px;
+  }
+  .concept-text p + p {
+    margin-top: 24px;
+  }
+  .concept-text em {
+    color: var(--accent);
+    font-style: italic;
+  }
+  /* SOUND SOURCES */
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .source-item {
+    background: var(--bg);
+    padding: 28px 24px;
+    transition: background 0.2s;
+  }
+  .source-item:hover { background: var(--bg2); }
+  .source-number {
+    font-size: 10px;
+    color: var(--accent-dim);
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+  .source-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 16px;
+    color: var(--fg);
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .source-desc {
+    font-size: 11px;
+    color: var(--fg-dim);
+    line-height: 1.6;
+  }
+  /* AUDIO PLAYER */
+  .audio-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    border-bottom: 1px solid var(--line);
+  }
+  .audio-intro {
+    font-size: 12px;
+    color: var(--fg-dim);
+    margin-bottom: 32px;
+    max-width: 560px;
+    line-height: 1.7;
+  }
+  .audio-players {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .audio-player-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    transition: border-color 0.2s;
+  }
+  .audio-player-row:hover { border-color: var(--accent-dim); }
+  .play-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--fg-dim);
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 10px;
+  }
+  .play-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .play-btn.playing {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .audio-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .audio-title {
+    font-family: 'IM Fell English', serif;
+    font-size: 15px;
+    color: var(--fg);
+    margin-bottom: 3px;
+  }
+  .audio-meta {
+    font-size: 10px;
+    color: var(--fg-dim);
+    letter-spacing: 0.08em;
+  }
+  .audio-waveform {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 24px;
+    opacity: 0.4;
+  }
+  .waveform-bar {
+    width: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+    transition: height 0.1s;
+  }
+  .audio-file {
+    display: none;
+  }
+  .audio-progress-wrap {
+    flex: 1;
+    min-width: 80px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+  .audio-progress-bar {
+    width: 100%;
+    height: 2px;
+    background: var(--fg-dimmer);
+    position: relative;
+    pointer-events: none;
+  }
+  .audio-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    position: relative;
+    pointer-events: none;
+  }
+  .audio-progress-fill::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: -2px;
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .audio-progress-wrap:hover .audio-progress-fill::after {
+    opacity: 1;
+  }
+  .audio-time {
+    font-size: 10px;
+    color: var(--fg-dim);
+    letter-spacing: 0.05em;
+    margin-left: 12px;
+    white-space: nowrap;
+    min-width: 70px;
+  }
+  /* BIO */
+  .bio-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px 60px;
+  }
+  .bio-text {
+    grid-column: 1 / -1;
+    font-family: 'IM Fell English', serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--fg);
+    max-width: 640px;
+  }
+  .bio-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    grid-column: 1 / -1;
+  }
+  .bio-tag {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+    border: 1px solid var(--line);
+    padding: 4px 12px;
+  }
+  /* CONTACT */
+  .contact-section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+  }
+  .contact-left {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(24px, 3vw, 36px);
+    line-height: 1.3;
+    color: var(--fg);
+    max-width: 400px;
+  }
+  .contact-left em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+  }
+  .contact-link {
+    font-size: 12px;
+    color: var(--fg-dim);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .contact-link:hover { color: var(--accent); }
+  .contact-link::before {
+    content: '→';
+    color: var(--accent-dim);
+    font-size: 10px;
+  }
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 100%;
+  }
+  .footer-left {
+    font-size: 10px;
+    color: var(--fg-dimmer);
+    letter-spacing: 0.1em;
+  }
+  .footer-right {
+    font-size: 10px;
+    color: var(--fg-dimmer);
+    letter-spacing: 0.1em;
+    font-style: italic;
+    font-family: 'IM Fell English', serif;
+  }
+  /* SCROLL ANIMATIONS */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: none;
+  }
+  /* WAVEFORM ANIMATION */
+  @keyframes wave {
+    0%, 100% { height: 4px; }
+    50% { height: 20px; }
+  }
+  .playing .waveform-bar {
+    animation: wave 0.8s ease-in-out infinite;
+    opacity: 1;
+  }
+  .playing .waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+  .playing .waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+  .playing .waveform-bar:nth-child(4) { animation-delay: 0.15s; }
+  .playing .waveform-bar:nth-child(5) { animation-delay: 0.05s; }
+  .playing .waveform-bar:nth-child(6) { animation-delay: 0.25s; }
+  .playing .waveform-bar:nth-child(7) { animation-delay: 0.1s; }
+  .playing .waveform-bar:nth-child(8) { animation-delay: 0.2s; }
+  @media (max-width: 640px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 48px; }
+    section, .audio-section, .contact-section { padding: 60px 24px; }
+    .bio-grid { grid-template-columns: 1fr; }
+    .contact-section { flex-direction: column; align-items: flex-start; }
+    .contact-links { align-items: flex-start; }
+    footer { padding: 20px 24px; flex-direction: column; gap: 8px; }
+    .hero-meta { flex-wrap: wrap; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#" class="nav-name">Lárus Sigurvin</a>
+  <ul class="nav-links">
+    <li><a href="#konsept">Konsept</a></li>
+    <li><a href="#lyd">Lydkilder</a></li>
+    <li><a href="#lytting">Lytt</a></li>
+    <li><a href="#bio">Bio</a></li>
+    <li><a href="#kontakt">Kontakt</a></li>
+  </ul>
+</nav>
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-wave"></div>
+  <h1 class="hero-title">En times<br><em>lyttereise</em></h1>
+  <div class="hero-meta">
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Format</span>
+      <span class="hero-meta-value">8-kanal surround</span>
+    </div>
+    <div class="hero-meta-item">
+      <span class="hero-meta-label">Varighet</span>
+      <span class="hero-meta-value">60 minutter</span>
+    </div>
+  </div>
+</div>
+<section id="konsept" class="fade-in">
+  <div class="section-label">Konsept</div>
+  <div class="concept-text">
+    <p>Utgangspunktet er et eget <em>just intonation</em>-system der harmoniske forholdstall hentes direkte fra overtonerekken, slik at stemmingen forankres fysisk i lyden selv. Inspirasjonen kommer fra La Monte Young: rene toner introduseres først, for å føre lytteren inn i et nytt tonesystem. Grunntonen holder stykket fast eller dukker opp her og der. Transformasjonen skjer i tekstur, panorering, rom og dynamikk.</p>
+    <p>Lydmaterialet bygger på egne feltopptak kombinert med samples fra norsk folkemusikk og svart metal, blendet med etniske samples. Målet er ikke å bruke samples som dominerende element, men å la dem gli inn i lydbildet på musikalske premisser. Noen steder mer musikalsk, andre steder mer lyder av vind, støy og omgivelser. I tillegg ønsker jeg å utforske hvordan lyder og melodiske elementer fra egne komposisjoner laget med hardware- og digitale synther kan fungere i et surroundsystem.</p>
+    <p>I et 8-kanals rom fordeles enkeltpartials fra overtonerekken til ulike høyttalere. Akkordene bygger seg opp romlig. Lyden møtes i lytterens kropp, ikke i miksbordet. Jeg ønsker å utforske 8 rytmiske lag fordelt i rommet der ulike taktarter går samtidig og glir inn i hverandre på tvers av høyttalerne, slik at rytmen oppleves som noe i bevegelse snarere enn noe fast. FM-modulasjon brukes til å farge de harmoniske forholdstallene, slik at klang og rytme er to sider av samme materiale. Melodiene i just intonation-systemet kan på denne måten bli rytmiske i seg selv, med referanser til tidlig techno og Buchla-estetikken fra 70-tallet. Inspirert av japansk ambient fra 80-tallet: tålmodighet, forankring, tid som materiale.</p>
+    <p>Jeg søker tilgang til et dedikert arbeidsrom med surroundsystem i Bergen. Prosjektet er i en utforskende fase og jeg ser ikke for meg en ferdig visning til våren, men med tid og tilgang kan det modnes mot en presentasjon utover høsten.</p>
+    <p>Teknisk behov: lydkort for 8-kanal surround, kompatibelt med MacBook M1.</p>
+  </div>
+</section>
+<section id="lyd" class="fade-in">
+  <div class="section-label">Lydkilder</div>
+  <div class="sources-grid">
+    <div class="source-item">
+      <div class="source-number">01</div>
+      <div class="source-title">Just Intonation — eget plugin</div>
+      <div class="source-desc">Egenutviklet VST med egendefinerte forholdstall. F som rot, 7-limit. Melodisk komposisjon.</div>
+    </div>
+    <div class="source-item">
+      <div class="source-number">03</div>
+      <div class="source-title">Hardware ambient</div>
+      <div class="source-desc">Egne komposisjoner med analog hardware. Tekstur og bindevev mellom lagene.</div>
+    </div>
+    <div class="source-item">
+      <div class="source-number">04</div>
+      <div class="source-title">Feltopptak</div>
+      <div class="source-desc">Hjulene til et vannkraftverk. Fuglelek. Urbane lyder. Stedsspesifikk forankring.</div>
+    </div>
+    <div class="source-item">
+      <div class="source-number">05</div>
+      <div class="source-title">Folkemusikk og svart metal</div>
+      <div class="source-desc">Eksisterende verk bearbeidet og rekontekstualisert. Sampling som kompositorisk metode.</div>
+    </div>
+    <div class="source-item">
+      <div class="source-number">06</div>
+      <div class="source-title">Lyddesign</div>
+      <div class="source-desc">Egenutviklede lydteksturer som limer de øvrige lagene sammen i rommet.</div>
+    </div>
+  </div>
+</section>
+<div class="audio-section fade-in" id="lytting">
+  <div class="section-label">Lytt</div>
+  <p class="audio-intro">Lydeksempler</p>
+  <div class="audio-players">
+    <div class="audio-player-row" id="row-1">
+      <button class="play-btn" onclick="togglePlay(1)" title="Spill av">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">Just Intonation, 7-limit, ren lyd</div>
+        <div class="audio-meta">JI / F-rot / 7-limit</div>
+      </div>
+      <div class="audio-progress-wrap" onclick="seek(event, 1)"><div class="audio-progress-bar"><div class="audio-progress-fill" id="progress-1"></div></div></div>
+      <span class="audio-time" id="time-1">0:00 / 0:00</span>
+      <audio id="audio-1" src="audio/Justintonation_7limit_cleansound.mp3" preload="auto"></audio>
+    </div>
+    <div class="audio-player-row" id="row-2">
+      <button class="play-btn" onclick="togglePlay(2)" title="Spill av">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">JI-melodi, rytmisk</div>
+        <div class="audio-meta">JI / rytmiske melodier</div>
+      </div>
+      <div class="audio-progress-wrap" onclick="seek(event, 2)"><div class="audio-progress-bar"><div class="audio-progress-fill" id="progress-2"></div></div></div>
+      <span class="audio-time" id="time-2">0:00 / 0:00</span>
+      <audio id="audio-2" src="audio/JI_Melody_Rythmic.mp3" preload="auto"></audio>
+    </div>
+    <div class="audio-player-row" id="row-3">
+      <button class="play-btn" onclick="togglePlay(3)" title="Spill av">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">FM-rytmeskisse, 8 lag</div>
+        <div class="audio-meta">FM-modulasjon / 8 rytmiske lag</div>
+      </div>
+      <div class="audio-progress-wrap" onclick="seek(event, 3)"><div class="audio-progress-bar"><div class="audio-progress-fill" id="progress-3"></div></div></div>
+      <span class="audio-time" id="time-3">0:00 / 0:00</span>
+      <audio id="audio-3" src="audio/Rythm_sketch_FM_8sounds.mp3" preload="auto"></audio>
+    </div>
+    <div class="audio-player-row" id="row-4">
+      <button class="play-btn" onclick="togglePlay(4)" title="Spill av">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">Ambient melodisk, hardware-synth</div>
+        <div class="audio-meta">Analog hardware / tekstur</div>
+      </div>
+      <div class="audio-progress-wrap" onclick="seek(event, 4)"><div class="audio-progress-bar"><div class="audio-progress-fill" id="progress-4"></div></div></div>
+      <span class="audio-time" id="time-4">0:00 / 0:00</span>
+      <audio id="audio-4" src="audio/Ambient_melodic.mp3" preload="auto"></audio>
+    </div>
+    <div class="audio-player-row" id="row-5">
+      <button class="play-btn" onclick="togglePlay(5)" title="Spill av">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">Feltopptak, vannkraftverk, pop-elementer</div>
+        <div class="audio-meta">Feltopptak / stedsforankring</div>
+      </div>
+      <div class="audio-progress-wrap" onclick="seek(event, 5)"><div class="audio-progress-bar"><div class="audio-progress-fill" id="progress-5"></div></div></div>
+      <span class="audio-time" id="time-5">0:00 / 0:00</span>
+      <audio id="audio-5" src="audio/Vannkraftverk_popelementer.mp3" preload="auto"></audio>
+    </div>
+    <div class="audio-player-row" id="row-6">
+      <button class="play-btn" onclick="togglePlay(6)" title="Spill av">▶</button>
+      <div class="audio-info">
+        <div class="audio-title">JI Techno</div>
+        <div class="audio-meta">JI / techno</div>
+      </div>
+      <div class="audio-progress-wrap" onclick="seek(event, 6)"><div class="audio-progress-bar"><div class="audio-progress-fill" id="progress-6"></div></div></div>
+      <span class="audio-time" id="time-6">0:00 / 0:00</span>
+      <audio id="audio-6" src="audio/JI_melodi_drift.mp3" preload="auto"></audio>
+    </div>
+  </div>
+</div>
+<section id="bio" class="fade-in">
+  <div class="section-label">Biografi</div>
+  <div class="bio-grid">
+    <div class="bio-text">
+      Lárus Sigurvin er islandsk-norsk musikk­produsent, komponist, DJ og livefremfører basert i Oslo. Han arbeider i skjæringspunktet mellom eksperimentell elektronisk musikk, komposisjon og tverr­kunstneriske uttrykk, med røtter i elektronika, feltarbeid og stemningssystemer utenfor den vestlige standardtradisjonen. Han er medgründer av det norske labelet lek.rec.
+    </div>
+  </div>
+</section>
+<div class="contact-section fade-in" id="kontakt">
+  <div class="contact-left">
+    Kontakt
+  </div>
+  <div class="contact-links">
+    <a href="mailto:larusj@gmail.com" class="contact-link">epost: larusj@gmail.com</a>
+    <span class="contact-link">tlf: 95444766</span>
+  </div>
+</div>
+<footer>
+  <span class="footer-left">Lárus Sigurvin — 2026</span>
+  <span class="footer-right">Þetta reddast</span>
+</footer>
+<script>
+  // Scroll animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(el => {
+      if (el.isIntersecting) {
+        el.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  // Audio player
+  let currentAudio = null;
+  let currentId = null;
+  function fmt(s) {
+    if (isNaN(s)) return '0:00';
+    var m = Math.floor(s / 60), sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+  function updateProgress(id) {
+    var audio = document.getElementById('audio-' + id);
+    var fill = document.getElementById('progress-' + id);
+    var time = document.getElementById('time-' + id);
+    if (audio.duration) {
+      fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+      time.textContent = fmt(audio.currentTime) + ' / ' + fmt(audio.duration);
+    }
+  }
+  function seek(e, id) {
+    var audio = document.getElementById('audio-' + id);
+    var wrap = e.currentTarget;
+    var rect = wrap.getBoundingClientRect();
+    var pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    if (audio.readyState < 1) {
+      audio.load();
+      audio.addEventListener('loadedmetadata', function handler() {
+        audio.currentTime = pct * audio.duration;
+        updateProgress(id);
+        audio.removeEventListener('loadedmetadata', handler);
+      });
+    } else {
+      audio.currentTime = pct * audio.duration;
+      updateProgress(id);
+    }
+  }
+  function resetPlayer(id) {
+    var btn = document.querySelector('#row-' + id + ' .play-btn');
+    btn.textContent = '▶';
+    btn.classList.remove('playing');
+    document.getElementById('progress-' + id).style.width = '0%';
+  }
+  function togglePlay(id) {
+    var audio = document.getElementById('audio-' + id);
+    var btn = document.querySelector('#row-' + id + ' .play-btn');
+    if (!audio.getAttribute('src')) return;
+    if (currentAudio && currentAudio !== audio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+      if (currentId) resetPlayer(currentId);
+    }
+    if (audio.paused) {
+      audio.play();
+      btn.textContent = '■';
+      btn.classList.add('playing');
+      currentAudio = audio;
+      currentId = id;
+      audio.ontimeupdate = function() { updateProgress(id); };
+      audio.onended = function() {
+        resetPlayer(id);
+        currentAudio = null;
+        currentId = null;
+      };
+    } else {
+      audio.pause();
+      btn.textContent = '▶';
+      btn.classList.remove('playing');
+      currentAudio = null;
+      currentId = null;
+    }
+  }
+</script>
+</body>
+</html>

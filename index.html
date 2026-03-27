@@ -37,6 +37,77 @@
     z-index: 1000;
     opacity: 0.6;
   }
+  /* LOGIN */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .login-box {
+    text-align: center;
+  }
+  .login-title {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(36px, 6vw, 64px);
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .login-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--fg-dim);
+    margin-bottom: 48px;
+  }
+  #login-screen form {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+  #pass-input {
+    background: transparent;
+    border: 1px solid var(--fg-dimmer);
+    color: var(--fg);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    padding: 10px 16px;
+    width: 200px;
+    text-align: center;
+    letter-spacing: 0.15em;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #pass-input::placeholder {
+    color: var(--fg-dimmer);
+    letter-spacing: 0.15em;
+  }
+  #pass-input:focus {
+    border-color: var(--accent-dim);
+  }
+  .login-btn {
+    background: transparent;
+    border: 1px solid var(--fg-dimmer);
+    color: var(--fg);
+    font-size: 16px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .login-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .login-error {
+    margin-top: 16px;
+    font-size: 11px;
+    color: #8b4040;
+    letter-spacing: 0.1em;
+    height: 20px;
+  }
   /* NAV */
   nav {
     position: fixed;
@@ -485,6 +556,20 @@
 </style>
 </head>
 <body>
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-title">Lárus Sigurvin</div>
+    <div class="login-subtitle">Residency-søknad, Vestre</div>
+    <form onsubmit="return checkPass()">
+      <input type="password" id="pass-input" placeholder="passord" autocomplete="off" autofocus>
+      <button type="submit" class="login-btn">→</button>
+    </form>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+<!-- MAIN SITE -->
+<div id="main-site" style="display:none">
 <nav>
   <a href="#" class="nav-name">Lárus Sigurvin</a>
   <ul class="nav-links">
@@ -716,6 +801,32 @@
       currentId = null;
     }
   }
+  // Login
+  function checkPass() {
+    var p = document.getElementById('pass-input').value;
+    fetch('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: p })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-site').style.display = 'block';
+        sessionStorage.setItem('auth', '1');
+      } else {
+        document.getElementById('login-error').textContent = 'feil passord';
+        document.getElementById('pass-input').value = '';
+      }
+    });
+    return false;
+  }
+  if (sessionStorage.getItem('auth') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-site').style.display = 'block';
+  }
 </script>
+</div>
 </body>
 </html>

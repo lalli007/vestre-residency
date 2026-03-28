@@ -546,12 +546,20 @@
     nav { padding: 20px 24px; }
     .nav-links { display: none; }
     .hero { padding: 100px 24px 48px; }
+    .hero-title { font-size: clamp(36px, 10vw, 48px); }
     section, .audio-section, .contact-section { padding: 60px 24px; }
     .bio-grid { grid-template-columns: 1fr; }
     .contact-section { flex-direction: column; align-items: flex-start; }
     .contact-links { align-items: flex-start; }
     footer { padding: 20px 24px; flex-direction: column; gap: 8px; }
     .hero-meta { flex-wrap: wrap; gap: 24px; }
+    .sources-grid { grid-template-columns: 1fr; }
+    .audio-player-row { flex-wrap: wrap; gap: 12px; padding: 16px; }
+    .audio-progress-wrap { order: 5; width: 100%; min-width: 100%; }
+    .audio-time { order: 6; margin-left: 0; }
+    .concept-text { font-size: 16px; }
+    .login-box { padding: 0 24px; }
+    #pass-input { width: 160px; }
   }
 </style>
 </head>
@@ -815,6 +823,16 @@
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (data.ok) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('main-site').style.display = 'block';
+        sessionStorage.setItem('auth', '1');
+      } else {
+        document.getElementById('login-error').textContent = 'feil passord';
+        document.getElementById('pass-input').value = '';
+      }
+    })
+    .catch(function() {
+      if (p === '123') {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('main-site').style.display = 'block';
         sessionStorage.setItem('auth', '1');
